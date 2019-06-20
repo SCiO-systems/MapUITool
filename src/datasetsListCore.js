@@ -1,4 +1,5 @@
 import React from "react";
+const cropNameList = [];
 
 const riceList = [];
 const maizeList = [];
@@ -2126,6 +2127,35 @@ yamsList.push({
 });
 
 
+
+cropNameList.push("Arabica coffee");
+cropNameList.push("Banana");
+cropNameList.push("Barley");
+cropNameList.push("Bean");
+cropNameList.push("Cassava");
+cropNameList.push("Chickpea");
+cropNameList.push("Cocoa");
+cropNameList.push("Groundnut");
+cropNameList.push("Lentil");
+cropNameList.push("Maize");
+cropNameList.push("Pearl millet");
+cropNameList.push("Pigeonpea");
+cropNameList.push("Plantain");
+cropNameList.push("Potato");
+cropNameList.push("Rice");
+cropNameList.push("Robusta coffe");
+cropNameList.push("Small millet");
+cropNameList.push("Sorghum");
+cropNameList.push("Soybean");
+cropNameList.push("Sweet potato");
+cropNameList.push("Wheat");
+cropNameList.push("Yams");
+
+
+
+
+
+
 const ifpriCropList = [];
 
 
@@ -2154,6 +2184,15 @@ ifpriCropList.push(yamsList);
 
 
 class DatasetsListCore extends React.Component {
+
+
+    static ifpriCropNameList() {
+
+
+        return cropNameList;
+
+
+    }
 
 
     static ifpriCropArray() {

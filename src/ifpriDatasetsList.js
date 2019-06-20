@@ -8,6 +8,7 @@ import DatasetsListCore from "./datasetsListCore";
 const style = {
     width: "95%",
     height: "60px",
+    display: "block",
     position: "relative"
 };
 
@@ -68,7 +69,8 @@ class IfpriDatasetsList extends React.Component {
                         // includeSelectAll={true}
                         includeFilter={false}
                         dropdownHeight={300}
-                    />
+
+                        />
                 </div>;
 
             items.push(myDiv)

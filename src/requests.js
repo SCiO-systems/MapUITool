@@ -1,6 +1,8 @@
 import React from "react";
-const gardianIpOrDomain = "http://localhost";
-const pathOfGeoJsons ="/test/countries/";
+const gardianIpOrDomain = "http://52.15.188.4";
+// const gardianIpOrDomain = "http://localhost";
+
+const pathOfGeoJsons ="/countries/";
 
 class Requests extends React.Component {
 

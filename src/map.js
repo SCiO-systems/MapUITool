@@ -686,7 +686,6 @@ import "leaflet-modal/dist/leaflet.modal.min.css"
 import "./leaflet-print"
 
 
-
 import "leaflet-control-geocoder/dist/Control.Geocoder"
 import "leaflet-control-geocoder/dist/Control.Geocoder.css"
 
@@ -700,10 +699,12 @@ import Requests from "./requests";
 import GenesysDatasetsList from "./genesysDatasetsList";
 import * as ReactDOMServer from "react-dom/server";
 import {getName} from "country-list";
+import DatasetsListCore from "./datasetsListCore";
 
+// const geotrellisIp = "http://localhost";
 
-const geotrellisIp = "http://localhost";
-const geotrellisCataloguesPath="/test/random_string/";
+const geotrellisIp = "http://52.15.188.4";
+const geotrellisCataloguesPath = "/random_string/";
 
 const style = {
 
@@ -766,12 +767,13 @@ class Map extends React.Component {
                 ]
             });
 
+
             //Move controlers to right!!!
             let controlRightContainer = document.getElementsByClassName("leaflet-top leaflet-right")[0];
-                controlRightContainer.style.right = '5px';
+            controlRightContainer.style.right = '5px';
 
             //Move logo to right!!!
-            let controlLogo= document.getElementsByClassName("leaflet-bottom leaflet-right")[0];
+            let controlLogo = document.getElementsByClassName("leaflet-bottom leaflet-right")[0];
             controlLogo.style.right = '5px';
             controlLogo.style.bottom = '5px';
 
@@ -779,21 +781,20 @@ class Map extends React.Component {
             L.Control.geocoder({
                 defaultMarkGeocode: false
             })
-                .on('markgeocode', function(e) {
+                .on('markgeocode', function (e) {
 
                     let lat = e.geocode.center.lat;
                     let lng = e.geocode.center.lng;
 
-                    Map.centerMap(lat,lng);
+                    Map.centerMap(lat, lng);
 
                 })
                 .addTo(this.map);
 
 
-
             let controlLoader = L.control.loader().addTo(this.map);
-
             controlLoader.show();
+
             this.map.attributionControl._attributions = {};
 
             let attribution = this.map.attributionControl;
@@ -818,7 +819,8 @@ class Map extends React.Component {
                 tab: wheat,  // content can be passed as HTML string,
                 pane: ifpriPane,        // DOM elements can be passed, too
                 title: '<a href="https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/DHXBJX/DBLMYY" target="_blank" style="text-decoration: none; color: white;"><span style="font-size: 20px;">  Crop Production Stats 2005 </span> ' + externalLink + '</a>',              // an optional pane header
-                position: 'top'                  // optional vertical alignment, defaults to 'top'
+                position: 'top',                // optional vertical alignment, defaults to 'top'
+
             };
 
             let genesysPanel = {
@@ -855,9 +857,30 @@ class Map extends React.Component {
             sidebarRight.addPanel(panelContentRight);
 
 
+            sidebarLeft.on('content', function (e) {
+
+                let panelId = e.id;
+                if (panelId === "genesysPanel") {
+                    Map.hideShow("hide");
+                    let colorElementSpam = document.getElementById("sidebarLeft").getElementsByClassName("leaflet-sidebar-tabs")[0].getElementsByTagName("li")[0];
+                    colorElementSpam.style.backgroundColor = '#ffffff';
+                    let colorElementGenesys = document.getElementById("sidebarLeft").getElementsByClassName("leaflet-sidebar-tabs")[0].getElementsByTagName("li")[1];
+                    colorElementGenesys.style.backgroundColor = '#0074d9';
+
+
+                } else if (panelId === "ifpriDatasetsPanel") {
+                    Map.hideShow("show");
+                    let colorElementSpam = document.getElementById("sidebarLeft").getElementsByClassName("leaflet-sidebar-tabs")[0].getElementsByTagName("li")[0];
+                    colorElementSpam.style.backgroundColor = '#0074d9';
+                    let colorElementGenesys = document.getElementById("sidebarLeft").getElementsByClassName("leaflet-sidebar-tabs")[0].getElementsByTagName("li")[1];
+                    colorElementGenesys.style.backgroundColor = '#ffffff';
+
+                }
+            });
 
 
             let drawnItems = new L.FeatureGroup();
+
 
             this.map.addLayer(drawnItems);
             let drawControl = new L.Control.Draw({
@@ -875,19 +898,6 @@ class Map extends React.Component {
             this.map.addControl(drawControl);
             let position1 = 3;
             let position2 = 40;
-            // let spinner = new Spinner(opts).spin(document.getElementById('map'));
-
-            // L.easyPrint({
-            //     tileLayer: this.baseLayer,
-            //     title: 'Choose PNG Size',
-            //     position: 'topright',
-            //     sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
-            //     filename: 'spam2005',
-            //     exportOnly: true,
-            //     hideControlContainer: true
-            // }).addTo(this.map);
-            //
-            //
 
 
             this.map.on('draw:created', async function (e) {
@@ -911,92 +921,92 @@ class Map extends React.Component {
                         let countryCode = await Requests.getCountryCode(lat, lng);
                         countryCode = countryCode.toString().toLowerCase();
                         if (!(countryCode === "null")) {
-                            if (!(dialogBoxIdList.indexOf(countryCode.toString()) > -1)){
+                            if (!(dialogBoxIdList.indexOf(countryCode.toString()) > -1)) {
 
 
                                 let countryIsoAlpha3 = await Requests.getCountryIsoAlpha3(countryCode);
-                            let myPolygon = await Requests.getPolygon(countryIsoAlpha3);
-                            let myPolygonType = await Requests.getTypeOfPolygon(countryIsoAlpha3);
-                            let geotrellisPolygonFormat = await Requests.getGeotrellisPolygonFormat(countryIsoAlpha3);
-                            let geotrellisStatistics = await Requests.getGeotrellisStatistics(geotrellisPolygonFormat, datasetsArray);
+                                let myPolygon = await Requests.getPolygon(countryIsoAlpha3);
+                                let myPolygonType = await Requests.getTypeOfPolygon(countryIsoAlpha3);
+                                let geotrellisPolygonFormat = await Requests.getGeotrellisPolygonFormat(countryIsoAlpha3);
+                                let geotrellisStatistics = await Requests.getGeotrellisStatistics(geotrellisPolygonFormat, datasetsArray);
 
 
-                            let states = {
-                                "type": "Feature",
-                                "properties": {"party": "Republican"},
-                                "geometry": {
-                                    "type": myPolygonType,
-                                    "coordinates": myPolygon
-                                }
-                            };
+                                let states = {
+                                    "type": "Feature",
+                                    "properties": {"party": "Republican"},
+                                    "geometry": {
+                                        "type": myPolygonType,
+                                        "coordinates": myPolygon
+                                    }
+                                };
 
-                            let geojsonLayer = L.geoJSON(states, {
-                                style: function (feature) {
-                                    return {color: "#f7941d", weight: 1};
-                                }
-                            });
-
-                            geojsonLayer.eachLayer(
-                                function (polygonFunction) {
-                                    let polygon = polygonFunction.on('click', function (e) {
-                                        if (!(typeof document.getElementsByClassName('leaflet-draw-toolbar-button-enabled')[0] === 'undefined')) {
-                                            drawnItems.removeLayer(markerPolygonGroup);
-                                        }
-                                    });
-                                    markerPolygonGroup.addLayer(polygon);
+                                let geojsonLayer = L.geoJSON(states, {
+                                    style: function (feature) {
+                                        return {color: "#f7941d", weight: 1};
+                                    }
                                 });
 
-
-                            let myDialog = Map.createDialogBox(countryCode);
-                            let myTable = ReactDOMServer.renderToString(Map.createTable(geotrellisStatistics, countryCode, datasetsArray));
-                            myDialog.setContent(myTable);
-                            myDialog.setLocation([position1, position2]);
-                            position1 = position1 + 10;
-                            position2 = position2 + 10;
-                            dialogBoxIdList.push(countryCode);
-
-                            spinner.stop();
-
-
-                            let marker = e.layer.on('click', async function (e) {
+                                geojsonLayer.eachLayer(
+                                    function (polygonFunction) {
+                                        let polygon = polygonFunction.on('click', function (e) {
+                                            if (!(typeof document.getElementsByClassName('leaflet-draw-toolbar-button-enabled')[0] === 'undefined')) {
+                                                drawnItems.removeLayer(markerPolygonGroup);
+                                            }
+                                        });
+                                        markerPolygonGroup.addLayer(polygon);
+                                    });
 
 
-                                if (!(typeof document.getElementsByClassName('leaflet-draw-toolbar-button-enabled')[0] === 'undefined')) {
-                                    drawnItems.removeLayer(markerPolygonGroup);
-                                }
-                                let spinner = new Spinner(opts).spin(document.getElementById('map'));
+                                let myDialog = Map.createDialogBox(countryCode);
+                                let myTable = ReactDOMServer.renderToString(Map.createTable(geotrellisStatistics, countryCode, datasetsArray));
+                                myDialog.setContent(myTable);
+                                myDialog.setLocation([position1, position2]);
+                                position1 = position1 + 10;
+                                position2 = position2 + 10;
+                                dialogBoxIdList.push(countryCode);
 
-                                if (!(typeof myDialog === 'undefined')) {
+                                spinner.stop();
 
-                                    let datasetsArray = ReactDOM.render(
-                                        <IfpriDatasetsList/>, document.getElementById('ifpriPane')).state.arrayValue;
 
-                                    let myDialog = Map.createDialogBox(countryCode, spinner);
-                                    let countryIsoAlpha3 = await Requests.getCountryIsoAlpha3(countryCode);
-                                    let geotrellisPolygonFormat = await Requests.getGeotrellisPolygonFormat(countryIsoAlpha3);
-                                    let geotrellisStatistics = await Requests.getGeotrellisStatistics(geotrellisPolygonFormat, datasetsArray);
-                                    let myTable = ReactDOMServer.renderToString(Map.createTable(geotrellisStatistics, countryCode, datasetsArray));
+                                let marker = e.layer.on('click', async function (e) {
+
+
+                                    if (!(typeof document.getElementsByClassName('leaflet-draw-toolbar-button-enabled')[0] === 'undefined')) {
+                                        drawnItems.removeLayer(markerPolygonGroup);
+                                    }
+                                    let spinner = new Spinner(opts).spin(document.getElementById('map'));
 
                                     if (!(typeof myDialog === 'undefined')) {
 
-                                        myDialog.setContent(myTable);
-                                        myDialog.setLocation([position1, position2]);
-                                        position1 = position1 + 10;
-                                        position2 = position2 + 10;
-                                        spinner.stop();
-                                    } else {
-                                        spinner.stop();
+                                        let datasetsArray = ReactDOM.render(
+                                            <IfpriDatasetsList/>, document.getElementById('ifpriPane')).state.arrayValue;
 
+                                        let myDialog = Map.createDialogBox(countryCode, spinner);
+                                        let countryIsoAlpha3 = await Requests.getCountryIsoAlpha3(countryCode);
+                                        let geotrellisPolygonFormat = await Requests.getGeotrellisPolygonFormat(countryIsoAlpha3);
+                                        let geotrellisStatistics = await Requests.getGeotrellisStatistics(geotrellisPolygonFormat, datasetsArray);
+                                        let myTable = ReactDOMServer.renderToString(Map.createTable(geotrellisStatistics, countryCode, datasetsArray));
+
+                                        if (!(typeof myDialog === 'undefined')) {
+
+                                            myDialog.setContent(myTable);
+                                            myDialog.setLocation([position1, position2]);
+                                            position1 = position1 + 10;
+                                            position2 = position2 + 10;
+                                            spinner.stop();
+                                        } else {
+                                            spinner.stop();
+
+                                        }
                                     }
-                                }
 
 
-                            });
+                                });
 
-                            markerPolygonGroup.addLayer(marker);
-                            drawnItems.addLayer(markerPolygonGroup);
+                                markerPolygonGroup.addLayer(marker);
+                                drawnItems.addLayer(markerPolygonGroup);
 
-                        }else{
+                            } else {
                                 spinner.stop();
                             }
 
@@ -1038,11 +1048,15 @@ class Map extends React.Component {
             this.map.remove();
         }
 
+
         return this.map;
     }
 
 
     static async showIfpriLayers(items) {
+
+
+        const cropIdList = [];
 
         let spinner = new Spinner(opts).spin(document.getElementById('map'));
 
@@ -1065,10 +1079,35 @@ class Map extends React.Component {
         for (let i = 0; i < items.length; i++) {
 
             legendIdList.push(items[i].id);
-
-            let url = geotrellisIp + geotrellisCataloguesPath + items[i].id + '/{z}/{x}/{y}.png'
+            cropIdList.push(items[i].crop);
+            let url = geotrellisIp + geotrellisCataloguesPath + items[i].id + '/{z}/{x}/{y}.png';
             let myLayer = L.tileLayer(url, {id: 'map'});
             this.layerGroup.addLayer(myLayer);
+
+        }
+
+        let cropFilteredList = cropIdList.filter(function (item, pos) {
+            return cropIdList.indexOf(item) === pos;
+        });
+
+        let cropNameList = DatasetsListCore.ifpriCropNameList();
+
+        for (let i = 0; i < cropNameList.length; i++) {
+            try {
+                let removeBoldElement = document.getElementById(cropNameList[i].toLowerCase()).getElementsByClassName("picky__placeholder")[0];
+
+                removeBoldElement.innerHTML = cropNameList[i];
+            } catch (e) {
+
+            }
+
+        }
+
+
+        for (let i = 0; i < cropFilteredList.length; i++) {
+
+            let addBoldElement = document.getElementById(cropFilteredList[i]).getElementsByClassName("picky__placeholder")[0];
+            addBoldElement.innerHTML = "<b>" + cropFilteredList[i].charAt(0).toUpperCase() + cropFilteredList[i].slice(1) + "</b>";
 
         }
 
@@ -1095,7 +1134,7 @@ class Map extends React.Component {
 
                     let titleDiv = document.createElement("div");
                     titleDiv.style.fontSize = "12px";
-                    titleDiv.style.width = "200px";
+                    titleDiv.style.width = "100%";
 
                     let titleSpan = document.createElement("span");
                     let titleContent = document.createTextNode(items[x].placeholder.toString() + ": " + items[x].name.toString());
@@ -1171,6 +1210,7 @@ class Map extends React.Component {
     }
 
     static showGenesysLayers(item) {
+
         this.layerGroup.clearLayers();
 
         let genesysLayer = L.tileLayer('https://cdn.genesys-pgr.org/explore/tile/{z}/{x}/{y}?filter={%22crops%22:[%22' + item + '%22]}');
@@ -1181,41 +1221,38 @@ class Map extends React.Component {
 
     }
 
-    static createDialogBox(countryCode,spinner) {
+    static createDialogBox(countryCode, spinner) {
 
         let elementToRemove = document.getElementById(countryCode.toString());
 
-         if(!(elementToRemove===null)) {
-             elementToRemove.remove();
-             try {
-                 spinner.stop();
-             }catch (e) {
-                 
-             }
-             for (let i = dialogBoxIdList.length - 1; i >= 0; i--) {
-                 if (dialogBoxIdList[i] === countryCode) {
-                     dialogBoxIdList.splice(i, 1);
-                     // break;       //<-- Uncomment  if only the first term has to be removed
-                 }
-             }
+        if (!(elementToRemove === null)) {
+            elementToRemove.remove();
+            try {
+                spinner.stop();
+            } catch (e) {
 
-             let index = dialogBoxIdList.indexOf(countryCode);
-             if (index > -1) {
-                 dialogBoxIdList.splice(index, 1);
-             }
+            }
+            for (let i = dialogBoxIdList.length - 1; i >= 0; i--) {
+                if (dialogBoxIdList[i] === countryCode) {
+                    dialogBoxIdList.splice(i, 1);
+                    // break;       //<-- Uncomment  if only the first term has to be removed
+                }
+            }
 
+            let index = dialogBoxIdList.indexOf(countryCode);
+            if (index > -1) {
+                dialogBoxIdList.splice(index, 1);
+            }
 
-         }else {
+        } else {
 
-             let dialog = L.control.dialog().addTo(this.map);
-             let divDialogSize = document.getElementsByClassName("leaflet-control-dialog leaflet-control").length;
-             let divDialog = document.getElementsByClassName("leaflet-control-dialog leaflet-control")[divDialogSize - 1];
-             divDialog.id = countryCode.toString();
-             dialogBoxIdList.push(countryCode);
-             return dialog;
-         }
-
-
+            let dialog = L.control.dialog().addTo(this.map);
+            let divDialogSize = document.getElementsByClassName("leaflet-control-dialog leaflet-control").length;
+            let divDialog = document.getElementsByClassName("leaflet-control-dialog leaflet-control")[divDialogSize - 1];
+            divDialog.id = countryCode.toString();
+            dialogBoxIdList.push(countryCode);
+            return dialog;
+        }
 
     }
 
@@ -1230,10 +1267,10 @@ class Map extends React.Component {
 
     }
 
-    static centerMap(lat,lng) {
+    static centerMap(lat, lng) {
 
 
-        let countryCenter = new L.LatLng(lat,lng);
+        let countryCenter = new L.LatLng(lat, lng);
         this.map.setView(countryCenter, 4);
 
     }
@@ -1257,7 +1294,7 @@ class Map extends React.Component {
             let sum = parseFloat(statistics[i].sum).toFixed(2);
             let count = parseFloat(statistics[i].count).toFixed(2);
 
-            let br =<br/>
+            let br = <br/>;
             let titleDiv = <div
                 style={{fontFamily: 'roboto', fontSize: '16px'}}>{datasetCrop + ": " + datasetName}
             </div>;
@@ -1265,15 +1302,15 @@ class Map extends React.Component {
             let myDiv =
                 <table style={{fontFamily: 'roboto'}}>
 
-                    <tbody>
-                    <tr>
+                    <tbody style={{border: 'none'}}>
+                    <tr style={{backgroundColor: '#ffffff'}}>
                         <th>min</th>
                         <th>max</th>
                         <th>sum</th>
                         <th>count</th>
                         <th>mean</th>
                     </tr>
-                    <tr>
+                    <tr style={{backgroundColor: '#ffffff'}}>
                         <td>{min}</td>
                         <td>{max}</td>
                         <td>{sum}</td>
@@ -1293,12 +1330,76 @@ class Map extends React.Component {
             <div>
                 <style
                     dangerouslySetInnerHTML={{__html: " table { border-collapse: collapse; width: 100%; } th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; } "}}/>
-                <div style={{fontFamily: 'roboto',fontSize:'18px'}}>{countryName}</div>
+                <div style={{fontFamily: 'roboto', fontSize: '18px'}}>{countryName}</div>
                 {items}
                 <br/>
             </div>;
 
         return myTable;
+    }
+
+
+    static hideShow(flag) {
+
+
+        let gen = ReactDOM.render(
+            <GenesysDatasetsList/>, document.getElementById('genesysPane')).state.selectedOption;
+
+
+        let filteredList = dialogBoxIdList.filter(function (item, pos) {
+            return dialogBoxIdList.indexOf(item) === pos;
+        });
+
+        if (flag === "hide") {
+
+            this.layerGroup.clearLayers();
+
+            let genesysLayer = L.tileLayer('https://cdn.genesys-pgr.org/explore/tile/{z}/{x}/{y}?filter={%22crops%22:[%22' + gen.trim() + '%22]}');
+            this.layerGroup.addLayer(genesysLayer);
+
+            this.layerGroup.addTo(this.map);
+
+            document.getElementsByClassName("leaflet-sidebar-right")[0].style.display = "none";
+            document.getElementsByClassName("leaflet-draw leaflet-control")[0].style.display = "none";
+            document.getElementsByClassName("leaflet-pane leaflet-overlay-pane")[0].style.display = "none";
+            document.getElementsByClassName("leaflet-pane leaflet-marker-pane")[0].style.display = "none";
+            document.getElementsByClassName("leaflet-pane leaflet-shadow-pane")[0].style.display = "none";
+
+            for (let i = 0; i < filteredList.length; i++) {
+                document.getElementById(filteredList[i].toString()).style.display = "none";
+            }
+
+
+        } else if (flag === "show") {
+            this.layerGroup.clearLayers();
+
+
+            let datasetsArray = ReactDOM.render(
+                <IfpriDatasetsList/>, document.getElementById('ifpriPane')).state.arrayValue;
+
+            for (let i = 0; i < datasetsArray.length; i++) {
+
+
+                let url = geotrellisIp + geotrellisCataloguesPath + datasetsArray[i].id + '/{z}/{x}/{y}.png';
+                let myLayer = L.tileLayer(url, {id: 'map'});
+                this.layerGroup.addLayer(myLayer);
+
+            }
+
+
+            this.layerGroup.addTo(this.map);
+
+            document.getElementsByClassName("leaflet-sidebar-right")[0].style.display = "block";
+            document.getElementsByClassName("leaflet-draw leaflet-control")[0].style.display = "block";
+            document.getElementsByClassName("leaflet-pane leaflet-overlay-pane")[0].style.display = "block";
+            document.getElementsByClassName("leaflet-pane leaflet-marker-pane")[0].style.display = "block";
+            document.getElementsByClassName("leaflet-pane leaflet-shadow-pane")[0].style.display = "block";
+
+            for (let i = 0; i < filteredList.length; i++) {
+                document.getElementById(filteredList[i].toString()).style.display = "block";
+            }
+        }
+
     }
 
 

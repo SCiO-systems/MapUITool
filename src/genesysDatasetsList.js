@@ -3,7 +3,7 @@ import DatasetsListCore from "./datasetsListCore";
 import Map from "./map";
 
 
-class GenesysDatasetsList2 extends React.Component {
+class GenesysDatasetsList extends React.Component {
     constructor() {
         super();
         this.state = {
@@ -54,4 +54,4 @@ class GenesysDatasetsList2 extends React.Component {
 }
 
 
-export default GenesysDatasetsList2;
+export default GenesysDatasetsList;
